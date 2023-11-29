@@ -24,7 +24,7 @@ export const fetchAddress = createAsyncThunk(
     // 3) Then we return an object with the data that we are interested in.
     // Payload of the FULFILLED state
     return { position, address };
-  },
+  }
 );
 
 const initialState = {

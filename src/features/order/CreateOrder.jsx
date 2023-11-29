@@ -12,7 +12,7 @@ import { fetchAddress } from '../user/userSlice';
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
-    str,
+    str
   );
 
 function CreateOrder() {
@@ -33,19 +33,19 @@ function CreateOrder() {
   const dispatch = useDispatch();
 
   const cart = useSelector(getCart);
-  const totalCartPrize = useSelector(getTotalCartPrice);
-  const priorityPrize = withPriority ? totalCartPrize * 0.02 : 0;
-  const totalPrize = totalCartPrize + priorityPrize;
+  const totalCartPrice = useSelector(getTotalCartPrice);
+  const priorityPrice = withPriority ? totalCartPrice * 0.2 : 0;
+  const totalPrice = totalCartPrice + priorityPrice;
 
   if (!cart.length) return <EmptyCart />;
 
   return (
     <div className="px-4 py-6">
-      <h2 className="mb-8 text-xl font-semibold">Ready to order? Lets go!</h2>
+      <h2 className="mb-8 text-xl font-semibold">Ready to order? Let's go!</h2>
 
       {/* <Form method="POST" action="/order/new"> */}
       <Form method="POST">
-        <div className="mb-5 flex grow flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <label className="sm:basis-40">First Name</label>
           <input
             className="input grow"
@@ -72,8 +72,7 @@ function CreateOrder() {
           <label className="sm:basis-40">Address</label>
           <div className="grow">
             <input
-              className="
-              input w-full"
+              className="input w-full"
               type="text"
               name="address"
               disabled={isLoadingAddress}
@@ -88,7 +87,7 @@ function CreateOrder() {
           </div>
 
           {!position.latitude && !position.longitude && (
-            <span className="absolute right-[3px] top-[3px] z-50 md:right-[3px] md:top-[3px]">
+            <span className="absolute right-[3px] top-[3px] z-50 md:right-[5px] md:top-[5px]">
               <Button
                 disabled={isLoadingAddress}
                 type="small"
@@ -105,8 +104,7 @@ function CreateOrder() {
 
         <div className="mb-12 flex items-center gap-5">
           <input
-            className="h-6 w-6 accent-yellow-400 focus:outline-none focus:ring
-            focus:ring-yellow-400 focus:ring-offset-2"
+            className="h-6 w-6 accent-yellow-400 focus:outline-none focus:ring focus:ring-yellow-400 focus:ring-offset-2"
             type="checkbox"
             name="priority"
             id="priority"
@@ -125,14 +123,15 @@ function CreateOrder() {
             name="position"
             value={
               position.longitude && position.latitude
-                ? `${position.latitude}, ${position.longitude}`
+                ? `${position.latitude},${position.longitude}`
                 : ''
             }
           />
+
           <Button disabled={isSubmitting || isLoadingAddress} type="primary">
             {isSubmitting
-              ? 'Placing order...'
-              : `Order now for ${formatCurrency(totalPrize)}`}
+              ? 'Placing order....'
+              : `Order now from ${formatCurrency(totalPrice)}`}
           </Button>
         </div>
       </Form>
@@ -150,16 +149,19 @@ export async function action({ request }) {
     priority: data.priority === 'true',
   };
 
+  console.log(order);
+
   const errors = {};
   if (!isValidPhone(order.phone))
     errors.phone =
-      'Please give us your correct phone number. We might need it to contact you';
+      'Please give us your correct phone number. We might need it to contact you.';
 
   if (Object.keys(errors).length > 0) return errors;
 
   // If everything is okay, create new order and redirect
   const newOrder = await createOrder(order);
 
+  // Do NOT overuse
   store.dispatch(clearCart());
 
   return redirect(`/order/${newOrder.id}`);
